@@ -81,11 +81,6 @@ root/
 
 ## 🔁 Workflow (Preview & Full Docs)
 
-Quick recommendation: keep a concise summary here and link to the detailed PDFs in the docs/ folder so recruiters and readers get an immediate overview but can open the full flowcharts if they want.
-
-- Full diagrams and detailed flowcharts: [docs/01_Request_Ingestion_Pipeline.pdf](./docs/01_Request_Ingestion_Pipeline.pdf), [docs/02_Approval_Workflow_Engine.pdf](./docs/02_Approval_Workflow_Engine.pdf), [docs/03_Intelligent_Workload_Orchestration.pdf](./docs/03_Intelligent_Workload_Orchestration.pdf), [docs/04_Agent_Assisted_Execution_Workflow.pdf](./docs/04_Agent_Assisted_Execution_Workflow.pdf)
-
-
 <summary>Compact workflow summary</summary>
 
 1. Intake — submission via Sheets/Form; timestamp & initial notification.  
@@ -97,7 +92,6 @@ Quick recommendation: keep a concise summary here and link to the detailed PDFs 
 
 
 <details>
-## System Architecture & Workflows
 
 This system is an event-driven, high-concurrency orchestration platform built to ensure data integrity, predictable SLA behavior, and efficient human+RPA workflows.
 
