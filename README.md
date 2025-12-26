@@ -85,14 +85,46 @@ Quick recommendation: keep a concise summary here and link to the detailed PDFs 
 
 - Full diagrams and detailed flowcharts: [docs/01_Request_Ingestion_Pipeline.pdf](./docs/01_Request_Ingestion_Pipeline.pdf), [docs/02_Approval_Workflow_Engine.pdf](./docs/02_Approval_Workflow_Engine.pdf), [docs/03_Intelligent_Workload_Orchestration.pdf](./docs/03_Intelligent_Workload_Orchestration.pdf), [docs/04_Agent_Assisted_Execution_Workflow.pdf](./docs/04_Agent_Assisted_Execution_Workflow.pdf)
 
-<details>
+
 <summary>Compact workflow summary</summary>
 
 1. Intake — submission via Sheets/Form; timestamp & initial notification.  
-2. Validate & Lock — data checks; distributed key-lock to avoid collisions.  
-3. Approval Loop — requester validation then approvers; handle send-back/reject/auto-approve.  
-4. Allocation — matrix or BAU; filter busy agents, balance by workload, round-robin tie-breaker.  
-5. Execution — agent claims task, processes or generates RPA script; updates child/master sheets.  
-6. Close — logging, notifications, cache invalidation, and archival.
+2. Validate & Lock — data checks; distributed key-lock to avoid collisions. ([Ingestion Pipeline](./docs/01_Request_Ingestion_Pipeline.pdf))  
+3. Approval Loop — requester validation then approvers; handle send-back/reject/auto-approve. ([Approval Workflow](./docs/02_Approval_Workflow_Engine.pdf))  
+4. Allocation — matrix or BAU; filter busy agents, balance by workload, round-robin tie-breaker. ([Workload Orchestration](./docs/03_Intelligent_Workload_Orchestration.pdf))  
+5. Execution — agent claims task, processes or generates RPA script; updates child/master sheets. ([Agent-Assisted Execution](./docs/04_Agent_Assisted_Execution_Workflow.pdf))  
+6. Close — logging, notifications, cache invalidation, and archival. ([Agent-Assisted Execution](./docs/04_Agent_Assisted_Execution_Workflow.pdf))
 
+
+<details>
+## System Architecture & Workflows
+
+This system is an event-driven, high-concurrency orchestration platform built to ensure data integrity, predictable SLA behavior, and efficient human+RPA workflows.
+
+### 01. Request Ingestion Pipeline
+- **Objective:** Validates and processes high-volume incoming data streams.
+- **Mechanism:** Uses an interval-driven trigger to batch-process new submissions, perform gatekeeping checks (Duplicate Detection, Data Integrity, Expiration) and construct a "Sync Context" for requestors and approvers before handing off to the approval engine.
+- **Key Tech:** Event Throttling, Cache-Based Validation, Context Construction.
+
+### 02. Approval Workflow Engine
+- **Objective:** Orchestrates multi-level decision gates and automated compliance checks.
+- **Mechanism:** Iterates through a hierarchy of contexts (Requester → Approvers), handling states like NEED REVIEW, AUTO-APPROVE, and SEND BACK. On final approval it computes SLA baselines, locks the record, and triggers the workload allocator.
+- **Key Tech:** State Machine Logic, SLA Calculation, Dynamic Routing.
+
+### 03. Intelligent Workload Orchestration
+- **Objective:** Autonomously assigns tasks to agents based on real-time availability and load.
+- **Mechanism:** Dual-strategy algorithm:
+    - **Matrix Distribution:** Routes specific request types using a skills matrix.
+    - **Load Balancing (BAU):** Filters available agents (ignoring "Busy"), then uses a Least-Connections (minimum total seconds) algorithm with a Round-Robin tie-breaker.
+- **Key Tech:** Round Robin Tie-Breaker, Workload Weighting, Resource Optimization.
+
+### 04. Agent-Assisted Execution Workflow
+- **Objective:** Hybrid Human-in-the-Loop workflow combining manual oversight with RPA tools.
+- **Mechanism:**
+    - **Path A (Claiming):** Grants dynamic Drive permissions and starts the SLA timer when an agent claims a task.
+    - **Path B (Status Management):** Enforces validation gates (e.g., require timestamps before completion) and handles rejection loops.
+    - **Path C (RPA Trigger):** Detects specific column edits to invoke the ScriptFactory, generating SAP VBScript files automatically for agent execution.
+- **Key Tech:** Human-in-the-Loop (HITL), Dynamic ACL (Access Control Lists), Automated Script Generation.
+
+For detailed diagrams and process flows, see the PDFs in the `docs/` folder referenced above.
 </details>
